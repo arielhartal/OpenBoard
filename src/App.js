@@ -4,6 +4,11 @@ import PostList from "./PostList";
 import PostDetails from "./PostDetails";
 import "./App.css";
 import AddPost from "./AddPost";
+import {
+  decoratePostWithUser,
+  enrichWithUsers,
+  getRandomUser,
+} from "./postUtils";
 
 const STORAGE_KEY = "openboard.posts";
 
@@ -20,7 +25,7 @@ function App() {
         try {
           const parsed = JSON.parse(storedPostsRaw);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            setPosts(parsed);
+            setPosts(enrichWithUsers(parsed));
             setLoading(false);
             return;
           }
@@ -34,7 +39,7 @@ function App() {
 
     fetch("https://jsonplaceholder.typicode.com/posts")
       .then((res) => res.json())
-      .then((data) => setPosts(data))
+      .then((data) => setPosts(enrichWithUsers(data)))
       .catch(() => setPosts([]))
       .finally(() => setLoading(false));
   }, []);
@@ -44,7 +49,17 @@ function App() {
   );
 
   function handleAddPost(newPost) {
-    setPosts((prevPosts) => [newPost, ...prevPosts]);
+    setPosts((prevPosts) => {
+      const enrichedPost = decoratePostWithUser(
+        {
+          ...newPost,
+          author: { ...getRandomUser() },
+          createdAt: new Date().toISOString(),
+        },
+        0
+      );
+      return [enrichedPost, ...prevPosts];
+    });
     setStatusMessage("Post added!");
     return true;
   }
