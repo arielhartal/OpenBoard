@@ -8,6 +8,7 @@ import {
   decoratePostWithUser,
   enrichWithUsers,
   getRandomUser,
+  getUserById,
 } from "./postUtils";
 
 const STORAGE_KEY = "openboard.posts";
@@ -53,7 +54,9 @@ function App() {
       const enrichedPost = decoratePostWithUser(
         {
           ...newPost,
-          author: { ...getRandomUser() },
+          author:
+            (newPost.authorId && getUserById(newPost.authorId)) ||
+            getRandomUser(),
           createdAt: new Date().toISOString(),
         },
         0

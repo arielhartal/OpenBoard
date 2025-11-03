@@ -46,6 +46,11 @@ function getRandomUser() {
   return USERS[randomIndex];
 }
 
+function getUserById(id) {
+  if (!id) return undefined;
+  return USERS.find((user) => user.id === id);
+}
+
 function createTimestampFromIndex(index) {
   const minutesAgo = (index + 1) * 12;
   return new Date(Date.now() - minutesAgo * 60 * 1000).toISOString();
@@ -101,6 +106,7 @@ export {
   USERS,
   FALLBACK_AUTHOR,
   getRandomUser,
+  getUserById,
   decoratePostWithUser,
   enrichWithUsers,
   formatRelativeTime,
