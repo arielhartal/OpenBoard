@@ -5,12 +5,33 @@ import PostDetails from "./PostDetails";
 import "./App.css";
 import AddPost from "./AddPost";
 
+const STORAGE_KEY = "openboard.posts";
+
 function App() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [statusMessage, setStatusMessage] = useState("");
 
   useEffect(() => {
+    try {
+      const storedPostsRaw = window.localStorage.getItem(STORAGE_KEY);
+      if (storedPostsRaw) {
+        try {
+          const parsed = JSON.parse(storedPostsRaw);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setPosts(parsed);
+            setLoading(false);
+            return;
+          }
+        } catch {
+          window.localStorage.removeItem(STORAGE_KEY);
+        }
+      }
+    } catch {
+      // localStorage unavailable (e.g., private mode); fall back to fetch
+    }
+
     fetch("https://jsonplaceholder.typicode.com/posts")
       .then((res) => res.json())
       .then((data) => setPosts(data))
@@ -24,7 +45,44 @@ function App() {
 
   function handleAddPost(newPost) {
     setPosts((prevPosts) => [newPost, ...prevPosts]);
+    setStatusMessage("Post added!");
+    return true;
   }
+  function handleRemovePost(targetId) {
+    setPosts((prevPosts) => prevPosts.filter((post) => post.id !== targetId));
+    setStatusMessage("Post removed.");
+  }
+
+  useEffect(() => {
+    if (!statusMessage) return undefined;
+
+    const timeoutId = window.setTimeout(() => {
+      setStatusMessage("");
+    }, 3500);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [statusMessage]);
+
+  useEffect(() => {
+    if (loading) return;
+
+    if (posts.length === 0) {
+      try {
+        window.localStorage.removeItem(STORAGE_KEY);
+      } catch {
+        // storage unavailable; nothing else to do
+      }
+      return;
+    }
+
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
+    } catch {
+      // storage unavailable; proceed without persistence
+    }
+  }, [posts, loading]);
 
 
   return (
@@ -45,6 +103,11 @@ function App() {
             onChange={(e) => setSearch(e.target.value)}
           />
           <Link to="/add" className="add-post-button">Add New Post</Link>
+          {statusMessage && (
+            <p className="flash-message" role="status">
+              {statusMessage}
+            </p>
+          )}
         </header>
         <main className="app-content">
           <Routes>
@@ -54,7 +117,7 @@ function App() {
                 loading ? (
                   <p className="status-text">Loading posts...</p>
                 ) : (
-                  <PostList posts={filteredPosts} />
+                  <PostList posts={filteredPosts} onDeletePost={handleRemovePost} />
                 )
               }
             />

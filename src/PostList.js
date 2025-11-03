@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import PostItem from "./PostItem";
 
-function PostList({ posts }) {
+function PostList({ posts, onDeletePost }) {
   if (posts.length === 0) {
     return <p className="status-text">No posts found.</p>;
   }
@@ -15,7 +15,12 @@ function PostList({ posts }) {
           state={{ post }}
           className="post-link"
         >
-          <PostItem post={post} />
+          <PostItem
+            post={post}
+            onDelete={
+              onDeletePost ? () => onDeletePost(post.id) : undefined
+            }
+          />
         </Link>
       ))}
     </div>

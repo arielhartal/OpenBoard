@@ -14,7 +14,8 @@ function AddPost({ onAddPost }) {
 
     const id = Math.floor(Math.random() * 100000);
     const newPost = { id, title: trimmedTitle, body: trimmedBody };
-    onAddPost(newPost);
+    const wasAdded = onAddPost(newPost);
+    if (!wasAdded) return;
     setTitle("");
     setBody("");
     navigate("/");
