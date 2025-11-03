@@ -240,6 +240,48 @@ body {
   color: #334155;
 }
 
+.post-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.post-card__like {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  background-color: rgba(99, 102, 241, 0.08);
+  color: #6366f1;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.15s ease, box-shadow 0.15s ease,
+    background-color 0.15s ease, color 0.15s ease;
+}
+
+.post-card__like:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 18px rgba(99, 102, 241, 0.2);
+}
+
+.post-card__like:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.post-card__like--active {
+  background-color: #ef4444;
+  border-color: #ef4444;
+  color: #ffffff;
+  box-shadow: 0 12px 22px rgba(239, 68, 68, 0.25);
+}
+
+.post-card__like-count {
+  font-variant-numeric: tabular-nums;
+}
 .post-details {
   max-width: 720px;
   margin: 0 auto;

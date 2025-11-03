@@ -70,6 +70,23 @@ function App() {
     setPosts((prevPosts) => prevPosts.filter((post) => post.id !== targetId));
     setStatusMessage("Post removed.");
   }
+  function handleToggleLike(targetId) {
+    setPosts((prevPosts) =>
+      prevPosts.map((post) => {
+        if (post.id !== targetId) return post;
+        const liked = !post.likedByMe;
+        const nextLikes = Math.max(
+          0,
+          post.likes + (liked ? 1 : -1)
+        );
+        return {
+          ...post,
+          likedByMe: liked,
+          likes: nextLikes,
+        };
+      })
+    );
+  }
 
   useEffect(() => {
     if (!statusMessage) return undefined;
@@ -135,7 +152,11 @@ function App() {
                 loading ? (
                   <p className="status-text">Loading posts...</p>
                 ) : (
-                  <PostList posts={filteredPosts} onDeletePost={handleRemovePost} />
+                  <PostList
+                    posts={filteredPosts}
+                    onDeletePost={handleRemovePost}
+                    onToggleLike={handleToggleLike}
+                  />
                 )
               }
             />

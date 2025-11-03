@@ -56,6 +56,12 @@ function createTimestampFromIndex(index) {
   return new Date(Date.now() - minutesAgo * 60 * 1000).toISOString();
 }
 
+function createLikesFromIndex(index) {
+  if (typeof index !== "number" || Number.isNaN(index)) return 0;
+  const base = (index * 7) % 18;
+  return base < 0 ? 0 : base;
+}
+
 function decoratePostWithUser(post, index = 0) {
   const hasAuthor = post.author && post.author.id;
   const baseUser = hasAuthor ? post.author : getUserForIndex(index);
@@ -64,6 +70,8 @@ function decoratePostWithUser(post, index = 0) {
     ...post,
     author: hasAuthor ? { ...post.author } : { ...baseUser },
     createdAt: post.createdAt ?? createTimestampFromIndex(index),
+    likes: typeof post.likes === "number" ? post.likes : createLikesFromIndex(index),
+    likedByMe: Boolean(post.likedByMe),
   };
 }
 

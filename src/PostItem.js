@@ -4,12 +4,18 @@ import {
   formatRelativeTime,
 } from "./postUtils";
 
-function PostItem({ post, onDelete }) {
+function PostItem({ post, onDelete, onToggleLike }) {
   function handleDeleteClick(event) {
     if (!onDelete) return;
     event.preventDefault();
     event.stopPropagation();
     onDelete();
+  }
+  function handleLikeClick(event) {
+    if (!onToggleLike) return;
+    event.preventDefault();
+    event.stopPropagation();
+    onToggleLike();
   }
 
   const author = post.author ?? FALLBACK_AUTHOR;
@@ -56,6 +62,19 @@ function PostItem({ post, onDelete }) {
           </div>
           <h3 className="post-card__title">{post.title}</h3>
           <p className="post-card__body">{post.body}</p>
+          <div className="post-card__actions">
+            <button
+              type="button"
+              className={`post-card__like ${
+                post.likedByMe ? "post-card__like--active" : ""
+              }`}
+              onClick={handleLikeClick}
+              aria-pressed={post.likedByMe}
+            >
+              <span aria-hidden="true">♥</span>
+              <span className="post-card__like-count">{post.likes}</span>
+            </button>
+          </div>
         </div>
       </div>
     </article>
