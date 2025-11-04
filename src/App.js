@@ -20,6 +20,7 @@ const FILTER_OPTIONS = [
   { id: "bookmarked", label: "Bookmarked" },
 ];
 const SEED_LIMIT = 30;
+const SKELETON_COUNT = 4;
 
 const DEFAULT_PROFILE = {
   id: "local-user",
@@ -68,6 +69,37 @@ function profileToAuthor(profile) {
     avatarColor: profile.avatarColor,
     avatarInitial: profile.avatarInitial,
   };
+}
+
+function PostSkeletonList() {
+  return (
+    <div className="post-list">
+      {Array.from({ length: SKELETON_COUNT }).map((_, index) => (
+        <article key={index} className="post-card skeleton-card" aria-hidden="true">
+          <div className="post-card__top">
+            <div className="skeleton-avatar shimmer-block" />
+            <div className="post-card__content">
+              <div className="post-card__header">
+                <div className="skeleton-lines">
+                  <span className="skeleton-line skeleton-line--medium shimmer-block" />
+                  <span className="skeleton-line skeleton-line--short shimmer-block" />
+                </div>
+                <span className="skeleton-pill shimmer-block" />
+              </div>
+              <span className="skeleton-line skeleton-line--large shimmer-block" />
+              <span className="skeleton-line shimmer-block" />
+              <span className="skeleton-line shimmer-block" />
+              <div className="post-card__actions">
+                <span className="skeleton-pill shimmer-block" />
+                <span className="skeleton-pill shimmer-block" />
+                <span className="skeleton-pill shimmer-block" />
+              </div>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+  );
 }
 
 function applyPersonalization(posts, profile) {
@@ -252,6 +284,35 @@ function App() {
 
     return sorted;
   }, [posts, filter, searchTerm, profile.id]);
+
+  const summaryItems = useMemo(() => {
+    if (posts.length === 0) {
+      return [
+        { id: "total", label: "Total posts", value: 0 },
+        { id: "mine", label: "My posts", value: 0 },
+        { id: "bookmarks", label: "Bookmarked", value: 0 },
+        { id: "likes", label: "Likes", value: 0 },
+        { id: "comments", label: "Comments", value: 0 },
+      ];
+    }
+
+    const totalPosts = posts.length;
+    const myPosts = posts.filter((post) => post.ownerId === profile.id).length;
+    const bookmarked = posts.filter((post) => post.bookmarkedByMe).length;
+    const likes = posts.reduce((acc, post) => acc + (post.likes || 0), 0);
+    const comments = posts.reduce(
+      (acc, post) => acc + (Array.isArray(post.comments) ? post.comments.length : 0),
+      0
+    );
+
+    return [
+      { id: "total", label: "Total posts", value: totalPosts },
+      { id: "mine", label: "My posts", value: myPosts },
+      { id: "bookmarks", label: "Bookmarked", value: bookmarked },
+      { id: "likes", label: "Likes", value: likes },
+      { id: "comments", label: "Comments", value: comments },
+    ];
+  }, [posts, profile.id]);
 
   function updateProfile(nextProfile) {
     setProfile((prevProfile) => {
@@ -518,6 +579,14 @@ function App() {
               </form>
             )}
           </section>
+          <section className="stats-bar">
+            {summaryItems.map((item) => (
+              <div key={item.id} className="stats-bar__item">
+                <span className="stats-bar__value">{item.value}</span>
+                <span className="stats-bar__label">{item.label}</span>
+              </div>
+            ))}
+          </section>
           <input
             className="search-input"
             type="text"
@@ -558,7 +627,7 @@ function App() {
               path="/"
               element={
                 loading ? (
-                  <p className="status-text">Loading posts...</p>
+                  <PostSkeletonList />
                 ) : (
                   <PostList
                     posts={filteredPosts}
