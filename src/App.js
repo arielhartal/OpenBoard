@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import PostList from "./PostList";
 import PostDetails from "./PostDetails";
@@ -12,11 +12,18 @@ import {
 } from "./postUtils";
 
 const STORAGE_KEY = "openboard.posts";
+const FILTER_OPTIONS = [
+  { id: "latest", label: "Latest" },
+  { id: "likes", label: "Most liked" },
+  { id: "local", label: "My posts" },
+];
+const SEED_LIMIT = 30;
 
 function App() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("latest");
   const [statusMessage, setStatusMessage] = useState("");
 
   useEffect(() => {
@@ -26,7 +33,12 @@ function App() {
         try {
           const parsed = JSON.parse(storedPostsRaw);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            setPosts(enrichWithUsers(parsed));
+            const hydrated = parsed.map((post, index) => ({
+              ...post,
+              source: post.source ?? "local",
+              id: post.id ?? index + 1,
+            }));
+            setPosts(enrichWithUsers(hydrated));
             setLoading(false);
             return;
           }
@@ -38,16 +50,55 @@ function App() {
       // localStorage unavailable (e.g., private mode); fall back to fetch
     }
 
-    fetch("https://jsonplaceholder.typicode.com/posts")
+    fetch(
+      `https://jsonplaceholder.typicode.com/posts?_limit=${SEED_LIMIT}`
+    )
       .then((res) => res.json())
-      .then((data) => setPosts(enrichWithUsers(data)))
+      .then((data) => {
+        const seeded = data.map((post, index) => ({
+          ...post,
+          id: post.id ?? index + 1,
+          source: "seed",
+        }));
+        setPosts(enrichWithUsers(seeded));
+      })
       .catch(() => setPosts([]))
       .finally(() => setLoading(false));
   }, []);
 
-  const filteredPosts = posts.filter((p) =>
-    p.title.toLowerCase().includes(search.toLowerCase())
-  );
+  const searchTerm = search.trim().toLowerCase();
+
+  const filteredPosts = useMemo(() => {
+    let working = posts;
+
+    if (searchTerm) {
+      working = working.filter((post) => {
+        const title = post.title.toLowerCase();
+        const body = post.body.toLowerCase();
+        return title.includes(searchTerm) || body.includes(searchTerm);
+      });
+    }
+
+    if (filter === "local") {
+      working = working.filter((post) => post.source === "local");
+    }
+
+    const sorted = [...working];
+    if (filter === "likes") {
+      sorted.sort(
+        (a, b) =>
+          b.likes - a.likes ||
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+    } else {
+      sorted.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+    }
+
+    return sorted;
+  }, [posts, filter, searchTerm]);
 
   function handleAddPost(newPost) {
     setPosts((prevPosts) => {
@@ -57,6 +108,9 @@ function App() {
           author:
             (newPost.authorId && getUserById(newPost.authorId)) ||
             getRandomUser(),
+          likes: 0,
+          likedByMe: false,
+          source: "local",
           createdAt: new Date().toISOString(),
         },
         0
@@ -119,7 +173,6 @@ function App() {
     }
   }, [posts, loading]);
 
-
   return (
     <Router>
       <div className="app">
@@ -128,15 +181,33 @@ function App() {
             <h1 className="app-title">OpenBoard</h1>
           </Link>
           <p className="app-subtitle">
-            Browse sample posts from JSONPlaceholder and filter by title.
+            Browse sample posts and add your own voice.
           </p>
           <input
             className="search-input"
             type="text"
-            placeholder="Search post title..."
+            placeholder="Search post title or body..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+          <div
+            className="filter-toolbar"
+            role="toolbar"
+            aria-label="Post filters"
+          >
+            {FILTER_OPTIONS.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                className={`filter-chip ${
+                  filter === option.id ? "filter-chip--active" : ""
+                }`}
+                onClick={() => setFilter(option.id)}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
           <Link to="/add" className="add-post-button">Add New Post</Link>
           {statusMessage && (
             <p className="flash-message" role="status">
@@ -156,6 +227,7 @@ function App() {
                     posts={filteredPosts}
                     onDeletePost={handleRemovePost}
                     onToggleLike={handleToggleLike}
+                    searchTerm={searchTerm}
                   />
                 )
               }

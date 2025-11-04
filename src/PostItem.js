@@ -1,26 +1,48 @@
+﻿import { Fragment } from "react";
 import {
   FALLBACK_AUTHOR,
   formatExactTime,
   formatRelativeTime,
 } from "./postUtils";
 
-function PostItem({ post, onDelete, onToggleLike }) {
-  function handleDeleteClick(event) {
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function highlightMatch(text, term) {
+  if (!term) return text;
+  const regex = new RegExp(`(${escapeRegExp(term)})`, "ig");
+  const parts = text.split(regex);
+  const lowerTerm = term.toLowerCase();
+
+  return parts.map((part, index) =>
+    part.toLowerCase() === lowerTerm ? (
+      <mark key={index}>{part}</mark>
+    ) : (
+      <Fragment key={index}>{part}</Fragment>
+    )
+  );
+}
+
+function PostItem({ post, onDelete, onToggleLike, searchTerm }) {
+  const author = post.author ?? FALLBACK_AUTHOR;
+  const timestampLabel = formatRelativeTime(post.createdAt);
+  const titleContent = highlightMatch(post.title, searchTerm);
+  const bodyContent = highlightMatch(post.body, searchTerm);
+
+  const handleDeleteClick = (event) => {
     if (!onDelete) return;
     event.preventDefault();
     event.stopPropagation();
     onDelete();
-  }
-  function handleLikeClick(event) {
+  };
+
+  const handleLikeClick = (event) => {
     if (!onToggleLike) return;
     event.preventDefault();
     event.stopPropagation();
     onToggleLike();
-  }
-
-  const author = post.author ?? FALLBACK_AUTHOR;
-
-  const timestampLabel = formatRelativeTime(post.createdAt);
+  };
 
   return (
     <article className="post-card">
@@ -60,8 +82,8 @@ function PostItem({ post, onDelete, onToggleLike }) {
               </button>
             )}
           </div>
-          <h3 className="post-card__title">{post.title}</h3>
-          <p className="post-card__body">{post.body}</p>
+          <h3 className="post-card__title">{titleContent}</h3>
+          <p className="post-card__body">{bodyContent}</p>
           <div className="post-card__actions">
             <button
               type="button"
@@ -71,7 +93,9 @@ function PostItem({ post, onDelete, onToggleLike }) {
               onClick={handleLikeClick}
               aria-pressed={post.likedByMe}
             >
-              <span aria-hidden="true">♥</span>
+              <span aria-hidden="true" className="post-card__like-icon">
+                ♥
+              </span>
               <span className="post-card__like-count">{post.likes}</span>
             </button>
           </div>

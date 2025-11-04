@@ -547,3 +547,84 @@ body {
     align-items: flex-start;
   }
 }
+.filter-toolbar {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 16px auto;
+  flex-wrap: wrap;
+}
+
+.filter-chip {
+  border: none;
+  background: rgba(148, 163, 184, 0.15);
+  color: #475569;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease,
+    background-color 0.15s ease, color 0.15s ease;
+}
+
+.filter-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(79, 70, 229, 0.16);
+}
+
+.filter-chip--active {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #ffffff;
+  box-shadow: 0 12px 22px rgba(99, 102, 241, 0.3);
+}
+
+.filter-chip:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.35);
+}
+
+.post-list-empty {
+  display: flex;
+  justify-content: center;
+  padding: 32px 0;
+}
+
+mark {
+  background: rgba(99, 102, 241, 0.25);
+  color: #312e81;
+  border-radius: 4px;
+  padding: 0 2px;
+}
+.post-card__like-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.post-card__like-icon,
+.post-card__like-count {
+  display: inline-flex;
+  align-items: center;
+}
+
+.post-card__like-icon + .post-card__like-count {
+  margin-left: 6px;
+}
+.post-card__dot {
+  margin: 0 6px;
+  color: #94a3b8;
+}
+
+.post-card__like-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.post-card__like-icon,
+.post-card__like-count {
+  display: inline-flex;
+  align-items: center;
+}
+
+.post-card__like-icon + .post-card__like-count {
+  margin-left: 6px;
+}
