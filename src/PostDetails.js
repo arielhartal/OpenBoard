@@ -7,6 +7,23 @@ import {
   formatRelativeTime,
 } from "./postUtils";
 
+const STORAGE_KEY = "openboard.posts";
+
+function getPostFromStorage(postId) {
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return null;
+    return (
+      parsed.find((storedPost) => String(storedPost.id) === String(postId)) ??
+      null
+    );
+  } catch {
+    return null;
+  }
+}
+
 function PostDetails() {
   const { id } = useParams();
   const derivedIndex = useMemo(() => {
@@ -18,36 +35,55 @@ function PostDetails() {
   }, [id]);
 
   const location = useLocation();
-  const initialPost = location.state?.post
-    ? decoratePostWithUser(location.state.post, derivedIndex)
-    : null;
-  const [post, setPost] = useState(initialPost);
+  const locationPost = location.state?.post ?? null;
+
+  const [post, setPost] = useState(() => {
+    if (locationPost) {
+      return decoratePostWithUser(locationPost, derivedIndex);
+    }
+    const stored = getPostFromStorage(id);
+    return stored ? decoratePostWithUser(stored, derivedIndex) : null;
+  });
 
   useEffect(() => {
-    if (post) return;
+    if (locationPost) {
+      setPost(decoratePostWithUser(locationPost, derivedIndex));
+      return;
+    }
+
+    const stored = getPostFromStorage(id);
+    if (stored) {
+      setPost(decoratePostWithUser(stored, derivedIndex));
+      return;
+    }
 
     let isCancelled = false;
-
     fetch(`https://jsonplaceholder.typicode.com/posts/${id}`)
       .then((res) => res.json())
       .then((data) => {
         if (!isCancelled) {
           setPost(decoratePostWithUser(data, derivedIndex));
         }
+      })
+      .catch(() => {
+        if (!isCancelled) {
+          setPost(null);
+        }
       });
 
     return () => {
       isCancelled = true;
     };
-  }, [id, post, derivedIndex]);
+  }, [id, locationPost, derivedIndex]);
 
-  if (!post) return <p>Loading...</p>;
+  if (!post) return <p className="status-text">Loading post...</p>;
   if (!post.title && !post.body)
     return <p className="status-text">Post not found.</p>;
 
   const author = post.author ?? FALLBACK_AUTHOR;
   const relativeTime = formatRelativeTime(post.createdAt);
   const exactTime = formatExactTime(post.createdAt);
+  const comments = Array.isArray(post.comments) ? post.comments : [];
 
   return (
     <div className="post-details">
@@ -65,7 +101,7 @@ function PostDetails() {
             <div className="post-details__subline">
               <span className="post-details__handle">{author.handle}</span>
               <span className="post-details__dot" aria-hidden="true">
-                •
+                {"\u2022"}
               </span>
               <time
                 className="post-details__timestamp"
@@ -79,6 +115,32 @@ function PostDetails() {
         </header>
         <h2 className="post-details__title">{post.title}</h2>
         <p className="post-details__body">{post.body}</p>
+
+        <section className="post-details__section">
+          <header className="post-details__section-header">
+            <h3 className="post-details__section-title">Comments</h3>
+            <span className="post-details__section-count">
+              {comments.length}
+            </span>
+          </header>
+          {comments.length === 0 ? (
+            <p className="post-details__empty">No comments yet.</p>
+          ) : (
+            <ul className="comment-list post-details__comments">
+              {comments.map((comment) => (
+                <li key={comment.id} className="comment-item">
+                  <div className="comment-meta">
+                    <span className="comment-author">{comment.author}</span>
+                    <span className="comment-time">
+                      {formatRelativeTime(comment.createdAt)}
+                    </span>
+                  </div>
+                  <p className="comment-body">{comment.body}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
       </article>
     </div>
   );

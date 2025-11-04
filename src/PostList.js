@@ -1,7 +1,15 @@
-﻿import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import PostItem from "./PostItem";
 
-function PostList({ posts, onDeletePost, onToggleLike, searchTerm }) {
+function PostList({
+  posts,
+  onDeletePost,
+  onToggleLike,
+  onAddComment,
+  searchTerm,
+}) {
+  const navigate = useNavigate();
+
   if (posts.length === 0) {
     return (
       <div className="post-list-empty">
@@ -13,12 +21,7 @@ function PostList({ posts, onDeletePost, onToggleLike, searchTerm }) {
   return (
     <div className="post-list">
       {posts.map((post) => (
-        <Link
-          key={post.id}
-          to={`/posts/${post.id}`}
-          state={{ post }}
-          className="post-link"
-        >
+        <div key={post.id} className="post-link">
           <PostItem
             post={post}
             searchTerm={searchTerm}
@@ -32,8 +35,12 @@ function PostList({ posts, onDeletePost, onToggleLike, searchTerm }) {
                 ? () => onToggleLike(post.id)
                 : undefined
             }
+            onAddComment={onAddComment}
+            onNavigate={() =>
+              navigate(`/posts/${post.id}`, { state: { post } })
+            }
           />
-        </Link>
+        </div>
       ))}
     </div>
   );

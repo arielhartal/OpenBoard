@@ -36,6 +36,7 @@ function App() {
             const hydrated = parsed.map((post, index) => ({
               ...post,
               source: post.source ?? "local",
+              comments: Array.isArray(post.comments) ? post.comments : [],
               id: post.id ?? index + 1,
             }));
             setPosts(enrichWithUsers(hydrated));
@@ -47,18 +48,17 @@ function App() {
         }
       }
     } catch {
-      // localStorage unavailable (e.g., private mode); fall back to fetch
+      /* ignore localStorage issues */
     }
 
-    fetch(
-      `https://jsonplaceholder.typicode.com/posts?_limit=${SEED_LIMIT}`
-    )
+    fetch(`https://jsonplaceholder.typicode.com/posts?_limit=${SEED_LIMIT}`)
       .then((res) => res.json())
       .then((data) => {
         const seeded = data.map((post, index) => ({
           ...post,
           id: post.id ?? index + 1,
           source: "seed",
+          comments: [],
         }));
         setPosts(enrichWithUsers(seeded));
       })
@@ -111,6 +111,7 @@ function App() {
           likes: 0,
           likedByMe: false,
           source: "local",
+          comments: [],
           createdAt: new Date().toISOString(),
         },
         0
@@ -120,10 +121,14 @@ function App() {
     setStatusMessage("Post added!");
     return true;
   }
+
   function handleRemovePost(targetId) {
-    setPosts((prevPosts) => prevPosts.filter((post) => post.id !== targetId));
+    setPosts((prevPosts) =>
+      prevPosts.filter((post) => post.id !== targetId)
+    );
     setStatusMessage("Post removed.");
   }
+
   function handleToggleLike(targetId) {
     setPosts((prevPosts) =>
       prevPosts.map((post) => {
@@ -142,6 +147,36 @@ function App() {
     );
   }
 
+  function handleAddComment(postId, body) {
+    const trimmed = body.trim();
+    if (!trimmed) return false;
+
+    const commentId =
+      typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+        ? crypto.randomUUID()
+        : `comment-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+    const newComment = {
+      id: commentId,
+      author: "You",
+      body: trimmed,
+      createdAt: new Date().toISOString(),
+    };
+
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post.id === postId
+          ? {
+              ...post,
+              comments: [...(post.comments ?? []), newComment],
+            }
+          : post
+      )
+    );
+
+    return true;
+  }
+
   useEffect(() => {
     if (!statusMessage) return undefined;
 
@@ -158,19 +193,11 @@ function App() {
     if (loading) return;
 
     if (posts.length === 0) {
-      try {
-        window.localStorage.removeItem(STORAGE_KEY);
-      } catch {
-        // storage unavailable; nothing else to do
-      }
+      window.localStorage.removeItem(STORAGE_KEY);
       return;
     }
 
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
-    } catch {
-      // storage unavailable; proceed without persistence
-    }
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
   }, [posts, loading]);
 
   return (
@@ -208,7 +235,9 @@ function App() {
               </button>
             ))}
           </div>
-          <Link to="/add" className="add-post-button">Add New Post</Link>
+          <Link to="/add" className="add-post-button">
+            Add New Post
+          </Link>
           {statusMessage && (
             <p className="flash-message" role="status">
               {statusMessage}
@@ -227,23 +256,19 @@ function App() {
                     posts={filteredPosts}
                     onDeletePost={handleRemovePost}
                     onToggleLike={handleToggleLike}
+                    onAddComment={handleAddComment}
                     searchTerm={searchTerm}
                   />
                 )
               }
             />
             <Route path="/posts/:id" element={<PostDetails />} />
-            <Route
-              path="/add" element={<AddPost onAddPost={handleAddPost} />}
-              />
-
+            <Route path="/add" element={<AddPost onAddPost={handleAddPost} />} />
           </Routes>
         </main>
       </div>
     </Router>
   );
 }
-
-
 
 export default App;
