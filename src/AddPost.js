@@ -1,14 +1,38 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { USERS } from "./postUtils";
 
-const DEFAULT_AUTHOR_ID = USERS[0]?.id ?? "";
+function AddPost({ onAddPost, profile }) {
+  const authorOptions = useMemo(() => {
+    const options = [];
+    if (profile) {
+      options.push({
+        id: profile.id,
+        name: profile.name,
+        handle: profile.handle,
+        avatarColor: profile.avatarColor,
+        avatarInitial: profile.avatarInitial,
+        isProfile: true,
+      });
+    }
+    USERS.forEach((user) => {
+      if (!profile || user.id !== profile.id) {
+        options.push({ ...user, isProfile: false });
+      }
+    });
+    return options;
+  }, [profile]);
 
-function AddPost({ onAddPost }) {
+  const defaultAuthorId = authorOptions[0]?.id ?? "";
+
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const [authorId, setAuthorId] = useState(DEFAULT_AUTHOR_ID);
+  const [authorId, setAuthorId] = useState(defaultAuthorId);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setAuthorId(defaultAuthorId);
+  }, [defaultAuthorId]);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -21,13 +45,13 @@ function AddPost({ onAddPost }) {
       id,
       title: trimmedTitle,
       body: trimmedBody,
-      authorId: authorId || DEFAULT_AUTHOR_ID,
+      authorId: authorId || profile?.id || defaultAuthorId,
     };
     const wasAdded = onAddPost(newPost);
     if (!wasAdded) return;
     setTitle("");
     setBody("");
-    setAuthorId(DEFAULT_AUTHOR_ID);
+    setAuthorId(defaultAuthorId);
     navigate("/");
   }
 
@@ -35,7 +59,7 @@ function AddPost({ onAddPost }) {
     title.trim().length === 0 || body.trim().length === 0 || !authorId;
 
   const selectedAuthor =
-    USERS.find((user) => user.id === authorId) ?? USERS[0] ?? null;
+    authorOptions.find((user) => user.id === authorId) ?? authorOptions[0] ?? null;
 
   return (
     <div className="add-post-container">
@@ -75,9 +99,11 @@ function AddPost({ onAddPost }) {
               value={authorId}
               onChange={(e) => setAuthorId(e.target.value)}
             >
-              {USERS.map((user) => (
+              {authorOptions.map((user) => (
                 <option key={user.id} value={user.id}>
-                  {`${user.name} (${user.handle})`}
+                  {user.isProfile
+                    ? `${user.name} (My profile)`
+                    : `${user.name} (${user.handle})`}
                 </option>
               ))}
             </select>

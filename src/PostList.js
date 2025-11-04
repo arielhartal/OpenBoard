@@ -5,6 +5,7 @@ function PostList({
   posts,
   onDeletePost,
   onToggleLike,
+  onToggleBookmark,
   onAddComment,
   searchTerm,
 }) {
@@ -33,6 +34,11 @@ function PostList({
             onToggleLike={
               typeof onToggleLike === "function"
                 ? () => onToggleLike(post.id)
+                : undefined
+            }
+            onToggleBookmark={
+              typeof onToggleBookmark === "function"
+                ? () => onToggleBookmark(post.id)
                 : undefined
             }
             onAddComment={onAddComment}

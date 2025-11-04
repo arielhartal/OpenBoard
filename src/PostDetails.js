@@ -24,7 +24,7 @@ function getPostFromStorage(postId) {
   }
 }
 
-function PostDetails() {
+function PostDetails({ profile }) {
   const { id } = useParams();
   const derivedIndex = useMemo(() => {
     const numericId = Number(id);
@@ -84,6 +84,14 @@ function PostDetails() {
   const relativeTime = formatRelativeTime(post.createdAt);
   const exactTime = formatExactTime(post.createdAt);
   const comments = Array.isArray(post.comments) ? post.comments : [];
+  const likedBy = Array.isArray(post.likedBy) ? post.likedBy : [];
+  const bookmarkedBy = Array.isArray(post.bookmarkedBy)
+    ? post.bookmarkedBy
+    : [];
+  const likedByMe = profile ? likedBy.includes(profile.id) : Boolean(post.likedByMe);
+  const bookmarkedByMe = profile
+    ? bookmarkedBy.includes(profile.id)
+    : Boolean(post.bookmarkedByMe);
 
   return (
     <div className="post-details">
@@ -115,6 +123,41 @@ function PostDetails() {
         </header>
         <h2 className="post-details__title">{post.title}</h2>
         <p className="post-details__body">{post.body}</p>
+
+        <section className="post-details__section post-details__section--meta">
+          <div className="post-details__stats" role="list">
+            <span className="post-details__stat" role="listitem">
+              <span aria-hidden="true">{"\u2665"}</span>
+              <span className="post-details__stat-value">{post.likes}</span>
+              <span className="sr-only">Likes</span>
+            </span>
+            <span className="post-details__stat" role="listitem">
+              <span aria-hidden="true">{"\u2605"}</span>
+              <span className="post-details__stat-value">
+                {bookmarkedBy.length}
+              </span>
+              <span className="sr-only">Bookmarks</span>
+            </span>
+            <span className="post-details__stat" role="listitem">
+              <span aria-hidden="true">{"\u{1F4AC}"}</span>
+              <span className="post-details__stat-value">
+                {comments.length}
+              </span>
+              <span className="sr-only">Comments</span>
+            </span>
+          </div>
+          <div className="post-details__badges">
+            {post.ownerId === profile?.id && (
+              <span className="post-details__badge">Your post</span>
+            )}
+            {likedByMe && (
+              <span className="post-details__badge">You liked this</span>
+            )}
+            {bookmarkedByMe && (
+              <span className="post-details__badge">Bookmarked</span>
+            )}
+          </div>
+        </section>
 
         <section className="post-details__section">
           <header className="post-details__section-header">

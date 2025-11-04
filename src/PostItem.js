@@ -54,6 +54,7 @@ function PostItem({
   post,
   onDelete,
   onToggleLike,
+  onToggleBookmark,
   onAddComment,
   onNavigate,
   searchTerm,
@@ -63,6 +64,9 @@ function PostItem({
   const titleContent = highlightMatch(post.title, searchTerm);
   const bodyContent = highlightMatch(post.body, searchTerm);
   const comments = post.comments ?? [];
+  const bookmarkCount = Array.isArray(post.bookmarkedBy)
+    ? post.bookmarkedBy.length
+    : 0;
 
   const [showComments, setShowComments] = useState(false);
   const [draftComment, setDraftComment] = useState("");
@@ -86,6 +90,13 @@ function PostItem({
     event.preventDefault();
     event.stopPropagation();
     onToggleLike();
+  };
+
+  const handleBookmarkClick = (event) => {
+    if (!onToggleBookmark) return;
+    event.preventDefault();
+    event.stopPropagation();
+    onToggleBookmark();
   };
 
   const handleAddCommentSubmit = (event) => {
@@ -180,6 +191,25 @@ function PostItem({
                 {"\u2665"}
               </span>
               <span className="post-card__like-count">{post.likes}</span>
+            </button>
+            <button
+              type="button"
+              className={`post-card__bookmark ${
+                post.bookmarkedByMe ? "post-card__bookmark--active" : ""
+              }`}
+              onClick={handleBookmarkClick}
+              aria-pressed={post.bookmarkedByMe}
+              title={post.bookmarkedByMe ? "Remove bookmark" : "Save for later"}
+              aria-label={
+                post.bookmarkedByMe ? "Remove bookmark" : "Save for later"
+              }
+            >
+              <span aria-hidden="true" className="post-card__bookmark-icon">
+                {"\u2605"}
+              </span>
+              <span className="post-card__bookmark-count">
+                {bookmarkCount}
+              </span>
             </button>
             <button
               type="button"
