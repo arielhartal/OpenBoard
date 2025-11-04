@@ -1,70 +1,76 @@
-# Getting Started with Create React App
+<div align="center">
+  <img src="public/favicon.ico" alt="OpenBoard logo" width="72" />
+  <h1>OpenBoard</h1>
+  <p>A polished social board to share ideas, react to posts, and curate your favorites.</p>
+</div>
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+---
 
-## Available Scripts
+## ✨ Overview
 
-In the project directory, you can run:
+OpenBoard is a React app designed to showcase real-world UI patterns and state management without needing a backend. It seeds realistic posts, then lets you:
 
-### `npm start`
+- Add new posts and instantly persist them to `localStorage`.
+- Highlight text matches, filter by likes/bookmarks/personal posts, and search titles or bodies.
+- React with likes, toggle bookmarks, and drop quick comments per post.
+- Personalize the active profile (name/handle/color) and post as that profile.
+- Jump between list and detail views with a responsive, interview-ready UI.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## 🚀 Live Demo
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+**Live site:** https://openboard-arielhartal.netlify.app/
 
-### `npm test`
+### Deploy to Netlify (no config needed)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+1. `npm run build`
+2. Either drag the `build/` folder onto [Netlify Drop](https://app.netlify.com/drop), **or** run `netlify deploy --dir=build` (preview) followed by `netlify deploy --prod --dir=build`.
+3. Update the link above and the project description so people can try it instantly.
 
-### `npm run build`
+## 🧱 Features
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- **Smart feed:** Search, filter, and highlight matches for fast scanning.
+- **Profile switching:** Update your display name, handle, and avatar color—posts added with that profile are marked as “My posts.”
+- **Bookmarks & likes:** Toggle and persist per user; filter down to just saved content.
+- **Comments:** Inline comment drawer per card plus a dedicated section in the detail route.
+- **Offline-ready state:** Everything is stored in `localStorage`; seeding uses JSONPlaceholder only on first load.
+- **Interview polish:** Skeleton loaders, activity summary bar, animated toast feedback, keyboard-friendly focus rings.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## 🛠️ Stack
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- React + React Router
+- CSS (hand-crafted with modern layout/focus states)
+- localStorage for persistence
+- JSONPlaceholder for initial seed data
 
-### `npm run eject`
+## 🧑‍💻 Getting Started
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```bash
+git clone https://github.com/<your-username>/openboard.git
+cd openboard
+npm install
+npm start
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+The app seeds posts on first launch, then stores everything locally under `openboard.posts`.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## 📦 Production Build
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```bash
+npm run build
+```
 
-## Learn More
+Outputs a minified build to `/build`. Deploy the folder on Netlify, Vercel, GitHub Pages, or any static host.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 🗺️ Roadmap
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- Dark mode toggle with persisted preference.
+- Shareable permalink for individual posts (pre-populated comments).
+- Basic E2E tests (Playwright/Cypress) and lint/test workflow.
 
-### Code Splitting
+## 🤝 Contributing
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Issues and PRs are welcome—fork the repo, branch off `main`, and open a pull request.
 
-### Analyzing the Bundle Size
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Made with ☕ by <your name> for the OpenBoard interview project.

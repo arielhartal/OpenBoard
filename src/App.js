@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import PostList from "./PostList";
 import PostDetails from "./PostDetails";
@@ -147,12 +147,18 @@ function App() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("latest");
   const [statusMessage, setStatusMessage] = useState("");
+  const hasHydratedPosts = useRef(false);
 
   useEffect(() => {
     setProfileDraft(profile);
   }, [profile]);
 
   useEffect(() => {
+    if (hasHydratedPosts.current) {
+      return;
+    }
+    hasHydratedPosts.current = true;
+
     try {
       const storedPostsRaw = window.localStorage.getItem(STORAGE_KEY);
       if (storedPostsRaw) {
@@ -205,7 +211,7 @@ function App() {
       })
       .catch(() => setPosts([]))
       .finally(() => setLoading(false));
-  }, []);
+  }, [profile]);
 
   useEffect(() => {
     setPosts((prev) => applyPersonalization(prev, profile));
@@ -478,10 +484,15 @@ function App() {
       <div className="app">
         <header className="app-header">
           <Link to="/" className="app-title-link">
-            <h1 className="app-title">OpenBoard</h1>
+            <h1 className="app-title">
+              <span className="app-title-icon" aria-hidden="true">
+                📌
+              </span>
+              OpenBoard
+            </h1>
           </Link>
           <p className="app-subtitle">
-            Browse sample posts and add your own voice.
+            Share quick posts, save favorites, and explore trending ideas.
           </p>
           <section className="profile-card">
             <div className="profile-card__summary">

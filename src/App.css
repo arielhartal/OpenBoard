@@ -11,7 +11,7 @@
 
 body {
   margin: 0;
-  font-family: "Segoe UI", Tahoma, sans-serif;
+  font-family: "Space Grotesk", "Segoe UI", Tahoma, sans-serif;
   background-color: #f5f7fb;
   color: #1f2933;
 }
@@ -37,6 +37,15 @@ body {
 .app-title {
   margin-bottom: 8px;
   font-size: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+}
+
+.app-title-icon {
+  font-size: 2.2rem;
+  filter: drop-shadow(0 8px 12px rgba(79, 70, 229, 0.22));
 }
 
 .app-title-link {
@@ -48,6 +57,7 @@ body {
 .app-subtitle {
   margin: 0;
   color: #52606d;
+  line-height: 1.6;
 }
 
 .profile-card {
